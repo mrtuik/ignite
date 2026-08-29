@@ -16,7 +16,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          # no "cache: npm" here — that needs a package-lock.json,
+          # which this repo doesn't have
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -25,7 +26,7 @@ jobs:
           java-version: "17"
 
       - name: Install npm dependencies
-        run: npm ci
+        run: npm install   # not "npm ci" — that also requires a lock file
 
       - name: Generate native Android project (expo prebuild)
         run: npx expo prebuild --platform android --non-interactive
