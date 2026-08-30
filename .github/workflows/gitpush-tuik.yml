@@ -76,14 +76,24 @@ jobs:
           else
             echo "No AndroidManifest.xml found — skipping permission injection"
           fi
-      - name: Apply custom app icon
+- name: Apply custom app icon
+  run: |
+    LOGO=$(ls gitpush/logo.* 2>/dev/null | head -n 1)
+    if [ -n "$LOGO" ]; then
+      for D in android/app/src/main/res/mipmap-*; do
+        [ -d "$D" ] && cp "$LOGO" "$D/ic_launcher.png" && cp "$LOGO" "$D/ic_launcher_round.png"
+      done
+    fi
++      - name: Create placeholder app icon
         run: |
-          LOGO=$(ls gitpush/logo.* 2>/dev/null | head -n 1)
-          if [ -n "$LOGO" ]; then
-            for D in android/app/src/main/res/mipmap-*; do
-              [ -d "$D" ] && cp "$LOGO" "$D/ic_launcher.png" && cp "$LOGO" "$D/ic_launcher_round.png"
-            done
-          fi
+          # Base64‑encoded 48×48 transparent PNG (tiny placeholder)
+          ICON_BASE64="iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAIAAAC1nk5eAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5AQIEB8cZcXcVQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABWSURBVGje7cEBDQAgDMKg+z9nYwVhB6KQk2VhZgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB8B2YAAZcV5VgAAAAASUVORK5CYII="
+          for D in android/app/src/main/res/mipmap-*; do
+            mkdir -p "$D"
+            echo "$ICON_BASE64" | base64 -d > "$D/ic_launcher.png"
+            cp "$D/ic_launcher.png" "$D/ic_launcher_round.png"
+          done
+
       - name: Build release APK
         run: |
           chmod +x android/gradlew
